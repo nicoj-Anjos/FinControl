@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.FinControl" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#3D4460</item>
+        <item name="colorPrimaryDark">#2D3350</item>
+        <item name="colorAccent">#4BBFCE</item>
+        <item name="android:windowBackground">#F2F2F2</item>
+        <item name="android:textColorHint">@color/hint_color</item>
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+
+    <style name="Theme.FinControl" parent="Base.Theme.FinControl" />
+</resources>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Fincontrol</string>
+    <string name="criar_conta">CRIAR CONTA</string>
+    <string name="email">E-MAIL</string>
+    <string name="usuario">NOME DE USUÁRIO</string>
+    <string name="senha">SENHA</string>
+    <string name="cadastrar">CADASTRAR</string>
+    <string name="termos">LI E CONCORDO COM OS TERMOS DA POLÍTICA DE PRIVACIDADE</string>
+    <string name="logo_desc">Logo FinControl</string>
+</resources>

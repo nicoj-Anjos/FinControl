@@ -1,0 +1,12 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Quando estiver selecionado (olho aberto) -->
+    <item
+        android:state_selected="true"
+        android:drawable="@drawable/eye_open_128"/>
+
+    <!-- Padrão (olho fechado) -->
+    <item
+        android:drawable="@drawable/eye_closed_128"/>
+
+</selector>
