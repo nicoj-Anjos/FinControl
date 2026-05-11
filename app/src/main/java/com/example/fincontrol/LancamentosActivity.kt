@@ -39,28 +39,27 @@ class LancamentosActivity : AppCompatActivity() {
         transactionRepository = TransactionRepository(this)
         val userId = sessionManager.getLoggedUserId() ?: run {
             goToLogin()
-            return
+            return@onCreate
         }
 
         expenseCategories = categoryRepository.getByType(TransactionType.EXPENSE)
         incomeCategories = categoryRepository.getByType(TransactionType.INCOME)
 
-        // tvValor agora é EditText no XML
-        val tvValor          = findViewById<EditText>(R.id.tvValor)
+        val tvValor           = findViewById<EditText>(R.id.tvValor)
         val tvDataSelecionada = findViewById<android.widget.TextView>(R.id.tvDataSelecionada)
-        val btnMais1         = findViewById<Button>(R.id.btnMais1)
-        val btnMais10        = findViewById<Button>(R.id.btnMais10)
-        val btnMais50        = findViewById<Button>(R.id.btnMais50)
-        val btnMais100       = findViewById<Button>(R.id.btnMais100)
-        val btnHoje          = findViewById<Button>(R.id.btnHoje)
-        val btnOntem         = findViewById<Button>(R.id.btnOntem)
-        val btnPeriodo       = findViewById<Button>(R.id.btnPeriodo)
-        val spinnerCategoria = findViewById<Spinner>(R.id.spinnerCategoria)
-        val checkRecorrente  = findViewById<CheckBox>(R.id.checkRecorrente)
-        val btnDespesa       = findViewById<Button>(R.id.btnDespesa)
-        val btnReceita       = findViewById<Button>(R.id.btnReceita)
-        val btnCadastrar     = findViewById<Button>(R.id.btnAdicionar)
-        val etDescricao      = findViewById<EditText>(R.id.etDescricao)
+        val btnMais1          = findViewById<Button>(R.id.btnMais1)
+        val btnMais10         = findViewById<Button>(R.id.btnMais10)
+        val btnMais50         = findViewById<Button>(R.id.btnMais50)
+        val btnMais100        = findViewById<Button>(R.id.btnMais100)
+        val btnHoje           = findViewById<Button>(R.id.btnHoje)
+        val btnOntem          = findViewById<Button>(R.id.btnOntem)
+        val btnPeriodo        = findViewById<Button>(R.id.btnPeriodo)
+        val spinnerCategoria  = findViewById<Spinner>(R.id.spinnerCategoria)
+        val checkRecorrente   = findViewById<CheckBox>(R.id.checkRecorrente)
+        val btnDespesa        = findViewById<Button>(R.id.btnDespesa)
+        val btnReceita        = findViewById<Button>(R.id.btnReceita)
+        val btnCadastrar      = findViewById<Button>(R.id.btnAdicionar)
+        val etDescricao       = findViewById<EditText>(R.id.etDescricao)
 
         // ── Helpers de valor ──────────────────────────────────────
         fun getValorCentavos(): Long {
@@ -87,19 +86,19 @@ class LancamentosActivity : AppCompatActivity() {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerCategoria.adapter = adapter
-
-            // Força a cor preta no item selecionado do spinner
             spinnerCategoria.post {
                 val tv = spinnerCategoria.selectedView as? android.widget.TextView
                 tv?.setTextColor(android.graphics.Color.parseColor("#252525"))
             }
         }
+
         spinnerCategoria.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>, view: android.view.View?, pos: Int, id: Long) {
                 (view as? android.widget.TextView)?.setTextColor(android.graphics.Color.parseColor("#252525"))
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
         }
+
         // ── Data ──────────────────────────────────────────────────
         fun setDate(date: LocalDate) {
             selectedDate = date
@@ -163,25 +162,59 @@ class LancamentosActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             val category = categories[spinnerCategoria.selectedItemPosition]
-            val result = transactionRepository.saveTransaction(
-                TransactionRepository.SaveTransactionRequest(
-                    userId = userId,
-                    categoryId = category.id,
-                    amountCents = cents,
-                    type = tipoLancamento,
-                    date = selectedDate,
-                    description = etDescricao.text.toString().trim().ifBlank { null },
-                    recurring = checkRecorrente.isChecked
-                )
-            )
-            result.onSuccess {
-                toast(if (checkRecorrente.isChecked) "Lançamento recorrente salvo." else "Lançamento salvo.")
-                startActivity(Intent(this, ExtratoActivity::class.java))
-                finish()
-            }.onFailure {
-                toast(it.message ?: "Erro ao salvar lançamento.")
+
+            val tipo = if (tipoLancamento == TransactionType.EXPENSE) "Despesa" else "Receita"
+            val valorFormatado = "R$ %,.2f".format(cents / 100.0)
+                .replace(",", "X").replace(".", ",").replace("X", ".")
+            val dataFormatada = DateUtils.format(selectedDate)
+            val descricao = etDescricao.text.toString().trim()
+            val recorrente = if (checkRecorrente.isChecked) "\nRecorrente: Sim" else ""
+            val descricaoLinha = if (descricao.isNotBlank()) "\nDescrição: $descricao" else ""
+
+            val mensagem = "Confirma o lançamento?\n\n" +
+                    "Tipo: $tipo\n" +
+                    "Valor: $valorFormatado\n" +
+                    "Categoria: ${category.name}\n" +
+                    "Data: $dataFormatada" +
+                    descricaoLinha +
+                    recorrente
+
+            val dialogView = layoutInflater.inflate(R.layout.dialog_confirmacao, null)
+            dialogView.findViewById<android.widget.TextView>(R.id.tvMensagem).text = mensagem
+
+            val dialog = android.app.AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            dialogView.findViewById<Button>(R.id.btnCancelar).setOnClickListener {
+                dialog.dismiss()
             }
-        }
+
+            dialogView.findViewById<Button>(R.id.btnConfirmar).setOnClickListener {
+                dialog.dismiss()
+                val result = transactionRepository.saveTransaction(
+                    TransactionRepository.SaveTransactionRequest(
+                        userId = userId,
+                        categoryId = category.id,
+                        amountCents = cents,
+                        type = tipoLancamento,
+                        date = selectedDate,
+                        description = descricao.ifBlank { null },
+                        recurring = checkRecorrente.isChecked
+                    )
+                )
+                result.onSuccess {
+                    toast(if (checkRecorrente.isChecked) "Lançamento recorrente salvo." else "Lançamento salvo.")
+                    startActivity(Intent(this@LancamentosActivity, ExtratoActivity::class.java))
+                    finish()
+                }.onFailure {
+                    toast(it.message ?: "Erro ao salvar lançamento.")
+                }
+            }
+
+            dialog.show()
+        } // ← fecha o btnCadastrar.setOnClickListener
 
         // ── Navegação ─────────────────────────────────────────────
         findViewById<ImageView>(R.id.btnVoltar).setOnClickListener { finish() }
@@ -196,7 +229,7 @@ class LancamentosActivity : AppCompatActivity() {
         findViewById<ImageView>(R.id.btnExtrato).setOnClickListener {
             startActivity(Intent(this, ExtratoActivity::class.java)); finish()
         }
-    }
+    } // ← fecha o onCreate
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
