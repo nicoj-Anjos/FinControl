@@ -87,7 +87,7 @@ class ExtratoActivity : AppCompatActivity() {
             "Deseja realmente excluir este lançamento?\n\n" +
                     "Valor: R$ %,.2f\n".format(transaction.amountCents / 100.0)
                         .replace(",", "X").replace(".", ",").replace("X", ".") +
-                    "Data: ${transaction.date}"
+                    "Data: ${transaction.transactionDate}"
 
         val dialog = android.app.AlertDialog.Builder(this)
             .setView(dialogView)
