@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,10 +31,12 @@ class ExtratoActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         transactionRepository = TransactionRepository(this)
         categoryRepository = CategoryRepository(this)
-        userId = sessionManager.getLoggedUserId() ?: run {
+        val loggedId = sessionManager.getLoggedUserId()
+        if (loggedId == null) {
             goToLogin()
             return
         }
+        userId = loggedId
 
         transactionRepository.syncRecurringTransactions(userId)
 
@@ -57,8 +58,12 @@ class ExtratoActivity : AppCompatActivity() {
             sessionManager.clear()
             goToLogin()
         }
-        findViewById<ImageView>(R.id.btnCarteira).setOnClickListener { startActivity(Intent(this, CarteiraActivity::class.java)); finish() }
-        findViewById<ImageView>(R.id.btnGrafico).setOnClickListener { startActivity(Intent(this, LancamentosActivity::class.java)); finish() }
+        findViewById<ImageView>(R.id.btnCarteira).setOnClickListener {
+            startActivity(Intent(this, CarteiraActivity::class.java)); finish()
+        }
+        findViewById<ImageView>(R.id.btnGrafico).setOnClickListener {
+            startActivity(Intent(this, LancamentosActivity::class.java)); finish()
+        }
         findViewById<ImageView>(R.id.btnExtrato).setOnClickListener { }
     }
 
@@ -75,16 +80,35 @@ class ExtratoActivity : AppCompatActivity() {
     }
 
     private fun deleteTransaction(transaction: FinanceTransaction) {
-        AlertDialog.Builder(this)
-            .setTitle("Excluir lançamento")
-            .setMessage("Deseja realmente excluir este lançamento?")
-            .setPositiveButton("Excluir") { _, _ ->
+        val dialogView = layoutInflater.inflate(R.layout.dialog_confirmacao, null)
+
+        dialogView.findViewById<android.widget.TextView>(R.id.tvTitulo).text = "Excluir Lançamento"
+        dialogView.findViewById<android.widget.TextView>(R.id.tvMensagem).text =
+            "Deseja realmente excluir este lançamento?\n\n" +
+                    "Valor: R$ %,.2f\n".format(transaction.amountCents / 100.0)
+                        .replace(",", "X").replace(".", ",").replace("X", ".") +
+                    "Data: ${transaction.date}"
+
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<android.widget.Button>(R.id.btnCancelar).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<android.widget.Button>(R.id.btnConfirmar).apply {
+            text = "Excluir"
+            setOnClickListener {
+                dialog.dismiss()
                 val deleted = transactionRepository.deleteTransaction(userId, transaction.id)
                 toast(if (deleted) "Lançamento excluído." else "Não foi possível excluir o lançamento.")
                 loadTransactions(findViewById(R.id.tvSemLancamentos))
             }
-            .setNegativeButton("Cancelar", null)
-            .show()
+        }
+
+        dialog.show()
     }
 
     private fun goToLogin() {
