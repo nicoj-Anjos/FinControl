@@ -89,6 +89,7 @@ class ExtratoActivity : AppCompatActivity() {
                     "Valor: R$ %,.2f\n".format(transaction.amountCents / 100.0)
                         .replace(",", "X").replace(".", ",").replace("X", ".") +
                     "Data: ${transaction.transactionDate}"
+        "a"
 
         val dialog = android.app.AlertDialog.Builder(this)
             .setView(dialogView)
