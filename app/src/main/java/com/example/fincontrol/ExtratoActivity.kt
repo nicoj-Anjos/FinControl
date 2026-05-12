@@ -85,6 +85,7 @@ class ExtratoActivity : AppCompatActivity() {
         dialogView.findViewById<android.widget.TextView>(R.id.tvTitulo).text = "Excluir Lançamento"
         dialogView.findViewById<android.widget.TextView>(R.id.tvMensagem).text =
             "Deseja realmente excluir este lançamento?\n\n" +
+                    "Categoria: ${transaction.categoryName}\n" +
                     "Valor: R$ %,.2f\n".format(transaction.amountCents / 100.0)
                         .replace(",", "X").replace(".", ",").replace("X", ".") +
                     "Data: ${transaction.transactionDate}"
