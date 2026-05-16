@@ -1,7 +1,14 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.FinControl" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+<resources>
+    <style name="Base.Theme.FinControl" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#3D4460</item>
+        <item name="colorPrimaryDark">#3D4460</item>
+        <item name="colorAccent">#4BBFCE</item>
+        <item name="android:windowBackground">#F2F2F2</item>
+        <item name="android:textColorHint">@color/hint_color</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:statusBarColor">#3D4460</item>
     </style>
+
+    <style name="Theme.FinControl" parent="Base.Theme.FinControl" />
 </resources>

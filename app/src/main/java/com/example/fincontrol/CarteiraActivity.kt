@@ -6,10 +6,14 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.fincontrol.data.SessionManager
 import com.example.fincontrol.data.TransactionRepository
 import com.example.fincontrol.ui.BudgetBarChartView
 import com.example.fincontrol.util.CurrencyUtils
+
 
 class CarteiraActivity : AppCompatActivity() {
 
@@ -17,9 +21,26 @@ class CarteiraActivity : AppCompatActivity() {
     private lateinit var transactionRepository: TransactionRepository
     private var balanceVisible = false
 
+    private fun getStatusBarHeight(): Int {
+        val insets = WindowInsetsCompat.toWindowInsetsCompat(
+            window.decorView.rootWindowInsets ?: return 0
+        )
+        return insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_carteira)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.isAppearanceLightStatusBars = false // ícones brancos
+
+// Cor de fundo da status bar via view raiz
+        window.decorView.setBackgroundColor(android.graphics.Color.parseColor("#2F3650"))
+
+        val rootView = findViewById<android.view.View>(R.id.root_layout)
+        rootView.setPadding(0, getStatusBarHeight(), 0, 0)
 
         sessionManager = SessionManager(this)
         transactionRepository = TransactionRepository(this)
