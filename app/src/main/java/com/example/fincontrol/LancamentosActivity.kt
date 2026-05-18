@@ -30,6 +30,9 @@ class LancamentosActivity : AppCompatActivity() {
     private var expenseCategories: List<Category> = emptyList()
     private var incomeCategories: List<Category> = emptyList()
 
+    private var lastExpenseCategoryIndex: Int = 0
+    private var lastIncomeCategoryIndex: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lancamentos)
@@ -62,6 +65,9 @@ class LancamentosActivity : AppCompatActivity() {
         val etDescricao       = findViewById<EditText>(R.id.etDescricao)
 
         // ── Helpers de valor ──────────────────────────────────────
+        // ── Helpers de valor ──────────────────────────────────────
+        var isFormatting = false  // evita loop infinito no TextWatcher
+
         fun getValorCentavos(): Long {
             val texto = tvValor.text.toString()
                 .replace(".", "").replace(",", "").trim()
@@ -70,9 +76,32 @@ class LancamentosActivity : AppCompatActivity() {
 
         fun setValor(centavos: Long) {
             val c = if (centavos < 0) 0L else centavos
+            isFormatting = true
             tvValor.setText("%d,%02d".format(c / 100, c % 100))
             tvValor.setSelection(tvValor.text.length)
+            isFormatting = false
         }
+
+// Formata automaticamente enquanto o usuário digita
+// mantendo sempre o padrão 0,00 como uma maquininha
+        tvValor.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (isFormatting) return
+                isFormatting = true
+
+                // Pega só os dígitos do que foi digitado
+                val digits = s.toString().replace(".", "").replace(",", "").trimStart('0')
+                val centavos = digits.toLongOrNull() ?: 0L
+
+                val formatted = "%d,%02d".format(centavos / 100, centavos % 100)
+                tvValor.setText(formatted)
+                tvValor.setSelection(formatted.length)
+
+                isFormatting = false
+            }
+        })
 
         // ── Categorias ────────────────────────────────────────────
         fun currentCategories(): List<Category> =
@@ -86,6 +115,12 @@ class LancamentosActivity : AppCompatActivity() {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerCategoria.adapter = adapter
+
+            // Restaura a última categoria selecionada para esse tipo
+            val lastIndex = if (tipoLancamento == TransactionType.EXPENSE)
+                lastExpenseCategoryIndex else lastIncomeCategoryIndex
+            spinnerCategoria.setSelection(lastIndex)
+
             spinnerCategoria.post {
                 val tv = spinnerCategoria.selectedView as? android.widget.TextView
                 tv?.setTextColor(android.graphics.Color.parseColor("#252525"))
@@ -95,6 +130,13 @@ class LancamentosActivity : AppCompatActivity() {
         spinnerCategoria.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>, view: android.view.View?, pos: Int, id: Long) {
                 (view as? android.widget.TextView)?.setTextColor(android.graphics.Color.parseColor("#252525"))
+
+                // Salva a posição para o tipo atual
+                if (tipoLancamento == TransactionType.EXPENSE) {
+                    lastExpenseCategoryIndex = pos
+                } else {
+                    lastIncomeCategoryIndex = pos
+                }
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
         }
