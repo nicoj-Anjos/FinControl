@@ -64,6 +64,15 @@ class LancamentosActivity : AppCompatActivity() {
         val btnCadastrar      = findViewById<Button>(R.id.btnAdicionar)
         val etDescricao       = findViewById<EditText>(R.id.etDescricao)
 
+        val btnCarteira = findViewById<ImageView>(R.id.btnCarteira)
+        val btnGrafico  = findViewById<ImageView>(R.id.btnGrafico)
+        val btnExtrato  = findViewById<ImageView>(R.id.btnExtrato)
+
+// Marca lançamentos como ativo
+        btnCarteira.setImageResource(R.drawable.carteira_icon)
+        btnGrafico.setImageResource(R.drawable.adicionar_icon_azul)
+        btnExtrato.setImageResource(R.drawable.extrato_icon)
+
         // ── Helpers de valor ──────────────────────────────────────
         // ── Helpers de valor ──────────────────────────────────────
         var isFormatting = false  // evita loop infinito no TextWatcher
@@ -249,6 +258,7 @@ class LancamentosActivity : AppCompatActivity() {
                 result.onSuccess {
                     toast(if (checkRecorrente.isChecked) "Lançamento recorrente salvo." else "Lançamento salvo.")
                     startActivity(Intent(this@LancamentosActivity, ExtratoActivity::class.java))
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                 }.onFailure {
                     toast(it.message ?: "Erro ao salvar lançamento.")
@@ -265,11 +275,15 @@ class LancamentosActivity : AppCompatActivity() {
             goToLogin()
         }
         findViewById<ImageView>(R.id.btnCarteira).setOnClickListener {
-            startActivity(Intent(this, CarteiraActivity::class.java)); finish()
+            startActivity(Intent(this, CarteiraActivity::class.java));
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+            finish()
         }
         findViewById<ImageView>(R.id.btnGrafico).setOnClickListener { }
         findViewById<ImageView>(R.id.btnExtrato).setOnClickListener {
-            startActivity(Intent(this, ExtratoActivity::class.java)); finish()
+            startActivity(Intent(this, ExtratoActivity::class.java));
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+            finish()
         }
     } // ← fecha o onCreate
 
@@ -279,6 +293,7 @@ class LancamentosActivity : AppCompatActivity() {
         startActivity(
             Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
         )
         finish()

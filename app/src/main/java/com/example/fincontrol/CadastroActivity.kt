@@ -44,6 +44,7 @@ class CadastroActivity : AppCompatActivity() {
                         sessionManager.saveUser(userId)
                         toast("Conta criada com sucesso.")
                         startActivity(Intent(this, CarteiraActivity::class.java))
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                         finishAffinity()
                     }.onFailure { error ->
                         toast(error.message ?: "Não foi possível criar a conta.")

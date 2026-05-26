@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openDashboard() {
         startActivity(Intent(this, CarteiraActivity::class.java))
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         finish()
     }
 

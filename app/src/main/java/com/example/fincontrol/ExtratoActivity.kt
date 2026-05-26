@@ -31,6 +31,7 @@ class ExtratoActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         transactionRepository = TransactionRepository(this)
         categoryRepository = CategoryRepository(this)
+
         val loggedId = sessionManager.getLoggedUserId()
         if (loggedId == null) {
             goToLogin()
@@ -40,8 +41,19 @@ class ExtratoActivity : AppCompatActivity() {
 
         transactionRepository.syncRecurringTransactions(userId)
 
-        val rv = findViewById<RecyclerView>(R.id.rvExtrato)
+        val rv      = findViewById<RecyclerView>(R.id.rvExtrato)
         val tvEmpty = findViewById<TextView>(R.id.tvSemLancamentos)
+
+        // ── Navbar: marca extrato como ativo ──────────────────────────
+        val btnCarteira = findViewById<ImageView>(R.id.btnCarteira)
+        val btnGrafico  = findViewById<ImageView>(R.id.btnGrafico)
+        val btnExtrato  = findViewById<ImageView>(R.id.btnExtrato)
+
+        btnCarteira.setImageResource(R.drawable.carteira_icon)
+        btnGrafico.setImageResource(R.drawable.adicionar_icon)
+        btnExtrato.setImageResource(R.drawable.extrato_icon_azul)
+
+        // ── RecyclerView ──────────────────────────────────────────────
         rv.layoutManager = LinearLayoutManager(this)
         adapter = TransactionAdapter(
             context = this,
@@ -53,18 +65,27 @@ class ExtratoActivity : AppCompatActivity() {
         rv.adapter = adapter
         loadTransactions(tvEmpty)
 
+        // ── Navegação ─────────────────────────────────────────────────
         findViewById<ImageView>(R.id.btnVoltar).setOnClickListener { finish() }
+
         findViewById<ImageView>(R.id.btnLogout).setOnClickListener {
             sessionManager.clear()
             goToLogin()
         }
-        findViewById<ImageView>(R.id.btnCarteira).setOnClickListener {
-            startActivity(Intent(this, CarteiraActivity::class.java)); finish()
+
+        btnCarteira.setOnClickListener {
+            startActivity(Intent(this, CarteiraActivity::class.java))
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+            finish()
         }
-        findViewById<ImageView>(R.id.btnGrafico).setOnClickListener {
-            startActivity(Intent(this, LancamentosActivity::class.java)); finish()
+
+        btnGrafico.setOnClickListener {
+            startActivity(Intent(this, LancamentosActivity::class.java))
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+            finish()
         }
-        findViewById<ImageView>(R.id.btnExtrato).setOnClickListener { }
+
+        btnExtrato.setOnClickListener { }
     }
 
     private fun loadTransactions(tvEmpty: TextView) {
@@ -89,7 +110,6 @@ class ExtratoActivity : AppCompatActivity() {
                     "Valor: R$ %,.2f\n".format(transaction.amountCents / 100.0)
                         .replace(",", "X").replace(".", ",").replace("X", ".") +
                     "Data: ${transaction.transactionDate}"
-        "a"
 
         val dialog = android.app.AlertDialog.Builder(this)
             .setView(dialogView)
@@ -117,6 +137,7 @@ class ExtratoActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         finish()
     }
 
