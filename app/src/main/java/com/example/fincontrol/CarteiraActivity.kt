@@ -89,13 +89,13 @@ class CarteiraActivity : AppCompatActivity() {
         btnGrafico.setOnClickListener {
             startActivity(Intent(this, LancamentosActivity::class.java))
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-            finish()
+
         }
 
         btnExtrato.setOnClickListener {
             startActivity(Intent(this, ExtratoActivity::class.java))
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-            finish()
+
         }
 
         findViewById<ImageView>(R.id.btnLogout).setOnClickListener {
